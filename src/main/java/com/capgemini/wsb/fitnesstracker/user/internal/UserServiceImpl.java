@@ -83,12 +83,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Optional<UserDto> findUserById(Long id) {
+        log.info("Attempting to find user with ID: {}", id);
         return userRepository.findById(id)
                 .map(userMapper::toDto);
     }
 
     @Override
     public List<User> findAllUsersOlderThan(LocalDate time) {
+        log.info("Fetching users older than: {}", time);
         return userRepository.findAllByBirthdateBefore(time);
     }
 }
