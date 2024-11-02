@@ -21,6 +21,7 @@ public class UserController {
     // Get all users with full details
     @GetMapping
     public List<UserDto> getAllUsers() {
+        log.info("Fetching all users");
         return userService.findAllUsers()
                 .stream()
                 .map(userMapper::toDto)
@@ -30,6 +31,7 @@ public class UserController {
     // Get a single user by ID
     @GetMapping("/{id}")
     public ResponseEntity<UserDto> getUserById(@PathVariable Long id) {
+        log.info("Fetching user with ID: {}", id);
         return userService.findUserById(id)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
@@ -54,6 +56,10 @@ public class UserController {
     // Create a new user
     @PostMapping
     public ResponseEntity<UserDto> addUser(@RequestBody UserDto userDto) {
+         if (userDto.getFirstName() == null || userDto.getLastName() == null || userDto.getBirthdate() == null) {
+            return ResponseEntity.badRequest().body(null); // Return appropriate error message
+        }
+        
         User newUser = userMapper.toEntity(userDto);
         User savedUser = userService.createUser(newUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(userMapper.toDto(savedUser));
@@ -69,6 +75,10 @@ public class UserController {
     // Update an existing user
     @PutMapping("/{id}")
     public ResponseEntity<UserDto> updateUser(@PathVariable Long id, @RequestBody UserDto userDto) {
+        if (userDto.getFirstName() == null || userDto.getLastName() == null || userDto.getBirthdate() == null) {
+            return ResponseEntity.badRequest().body(null); // Return appropriate error message
+        }
+
         User updatedUser = userService.updateUser(id, userMapper.toEntity(userDto));
         return ResponseEntity.ok(userMapper.toDto(updatedUser));
     }
