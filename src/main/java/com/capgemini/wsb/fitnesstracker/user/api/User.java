@@ -1,24 +1,21 @@
 package com.capgemini.wsb.fitnesstracker.user.api;
 
-import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
+import org.hibernate.annotations.NaturalId;
 
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "users")
 @Getter
+@Setter // Apply setters but with caution or selectively
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Nullable
     private Long id;
 
     @Column(name = "first_name", nullable = false)
@@ -30,6 +27,7 @@ public class User {
     @Column(name = "birthdate", nullable = false)
     private LocalDate birthdate;
 
+    @NaturalId
     @Column(nullable = false, unique = true)
     private String email;
 
@@ -44,6 +42,4 @@ public class User {
         this.birthdate = birthdate;
         this.email = email;
     }
-
 }
-

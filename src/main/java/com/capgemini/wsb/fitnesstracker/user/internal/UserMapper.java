@@ -28,4 +28,5 @@ class UserMapper {
                 user.getFirstName(),
                 user.getLastName());
     }
+
 }

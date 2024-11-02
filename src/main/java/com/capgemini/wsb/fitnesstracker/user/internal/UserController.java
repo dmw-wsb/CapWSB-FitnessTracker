@@ -2,8 +2,7 @@ package com.capgemini.wsb.fitnesstracker.user.internal;
 
 import com.capgemini.wsb.fitnesstracker.user.api.User;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,12 +11,12 @@ import java.util.List;
 @RestController
 @RequestMapping("/v1/users")
 @RequiredArgsConstructor
-class UserController {
+public class UserController {
 
     private final UserServiceImpl userService;
-
     private final UserMapper userMapper;
 
+    // Get all users with full details
     @GetMapping
     public List<UserDto> getAllUsers() {
         return userService.findAllUsers()
@@ -25,40 +24,43 @@ class UserController {
                 .map(userMapper::toDto)
                 .toList();
     }
+
+    // Get a single user by ID
     @GetMapping("/{id}")
     public ResponseEntity<UserDto> getUserById(@PathVariable Long id) {
         return userService.findUserById(id)
-                .map(user -> ResponseEntity.ok(userMapper.toDto((User) user)))
+                .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // Pobieranie listy użytkowników tylko z podstawowymi informacjami
+    // Get all users with basic information
     @GetMapping("/simple")
     public List<UserSimpleDto> getAllBasicInformationAboutUsers() {
         return userService.findAllUsers()
                 .stream()
                 .map(userMapper::toUserSimpleDto)
                 .toList();
-}
-    @PostMapping
-    public User addUser(@RequestBody UserDto userDto) throws InterruptedException {
-
-        // Demonstracja how to use @RequestBody
-        System.out.println("User with e-mail: " + userDto.email() + "passed to the request");
-
-        // TODO: saveUser with Service and return User
-        return null;
     }
-    //USUWANIE REKORDU UZYTKOWNIKA
+
+    // Create a new user
+    @PostMapping
+    public ResponseEntity<UserDto> addUser(@RequestBody UserDto userDto) {
+        User newUser = userMapper.toEntity(userDto);
+        User savedUser = userService.createUser(newUser);
+        return ResponseEntity.status(HttpStatus.CREATED).body(userMapper.toDto(savedUser));
+    }
+
+    // Delete a user by ID
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
-    //AKTUALIZACJA UZYTKOWNIKA
+
+    // Update an existing user
     @PutMapping("/{id}")
     public ResponseEntity<UserDto> updateUser(@PathVariable Long id, @RequestBody UserDto userDto) {
-        User user = userService.updateUser(id, userMapper.toEntity(userDto));
-        return ResponseEntity.ok(userMapper.toDto(user));
+        User updatedUser = userService.updateUser(id, userMapper.toEntity(userDto));
+        return ResponseEntity.ok(userMapper.toDto(updatedUser));
     }
 }
