@@ -2,6 +2,7 @@ package com.capgemini.wsb.fitnesstracker.user.api;
 
 import com.capgemini.wsb.fitnesstracker.user.internal.UserDto;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,4 +27,6 @@ public interface UserService {
     User saveUser(User user);
 
     Optional<com.capgemini.wsb.fitnesstracker.user.internal.UserDto> findUserById(Long id);
+
+    List<User> findAllUsersOlderThan(LocalDate time);
 }
