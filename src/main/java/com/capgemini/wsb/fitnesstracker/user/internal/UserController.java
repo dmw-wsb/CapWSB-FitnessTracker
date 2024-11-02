@@ -44,6 +44,13 @@ public class UserController {
                 .toList();
     }
 
+    @GetMapping("/email")
+    public ResponseEntity<UserDto> getUserByEmail(@RequestParam String email) {
+        return userService.getUserByEmail(email)
+                .map(user -> ResponseEntity.ok(userMapper.toDto(user)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
     // Create a new user
     @PostMapping
     public ResponseEntity<UserDto> addUser(@RequestBody UserDto userDto) {
@@ -65,6 +72,7 @@ public class UserController {
         User updatedUser = userService.updateUser(id, userMapper.toEntity(userDto));
         return ResponseEntity.ok(userMapper.toDto(updatedUser));
     }
+
     @GetMapping("/older/{time}")
     public ResponseEntity<List<UserDto>> getUsersOlderThan(@PathVariable("time") LocalDate time) {
         List<UserDto> users = userService.findAllUsersOlderThan(time)

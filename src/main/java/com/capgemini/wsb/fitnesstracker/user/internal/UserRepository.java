@@ -17,11 +17,7 @@ interface UserRepository extends JpaRepository<User, Long> {
      * @param email email of the user to search
      * @return {@link Optional} containing found user or {@link Optional#empty()} if none matched
      */
-    default Optional<User> findByEmail(String email) {
-        return findAll().stream()
-                        .filter(user -> Objects.equals(user.getEmail(), email))
-                        .findFirst();
-    }
+    Optional<User> findByEmail(String email);
 
     List<User> findAllByBirthdateBefore(LocalDate date);
 }

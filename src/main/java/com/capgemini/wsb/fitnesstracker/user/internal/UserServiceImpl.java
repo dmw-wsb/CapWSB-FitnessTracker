@@ -18,6 +18,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+
     @Override
     public User createUser(final User user) {
         log.info("Attempting to create user: {}", user);
@@ -62,11 +63,14 @@ public class UserServiceImpl implements UserService {
         log.info("Updating user with ID: {}", id);
         return userRepository.findById(id)
                 .map(user -> {
+                    log.info("Current user details: {}", user);
                     user.setFirstName(updatedUser.getFirstName());
                     user.setLastName(updatedUser.getLastName());
-                    user.setEmail(updatedUser.getEmail());
+                    // Since email is a naturalId and should not be updated, we're excluding it from the update process
                     user.setBirthdate(updatedUser.getBirthdate());
-                    return userRepository.save(user);
+                    User savedUser = userRepository.save(user);
+                    log.info("Updated user details: {}", savedUser);
+                    return savedUser;
                 })
                 .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + id));
     }
@@ -87,7 +91,4 @@ public class UserServiceImpl implements UserService {
     public List<User> findAllUsersOlderThan(LocalDate time) {
         return userRepository.findAllByBirthdateBefore(time);
     }
-
-
 }
-
