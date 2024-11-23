@@ -1,94 +1,101 @@
+
 package com.capgemini.wsb.fitnesstracker.user.internal;
 
 import com.capgemini.wsb.fitnesstracker.user.api.User;
-import com.capgemini.wsb.fitnesstracker.user.api.UserNotFoundException;
 import com.capgemini.wsb.fitnesstracker.user.api.UserService;
+import com.capgemini.wsb.fitnesstracker.user.api.dto.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class UserServiceImpl implements UserService {
+class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Override
-    public User createUser(final User user) {
-        log.info("Attempting to create user: {}", user);
-        if (user.getId() != null) {
-            log.error("Failed to create a user with pre-set ID: {}", user.getId());
-            throw new IllegalArgumentException("Cannot create user with pre-set ID. Use update for existing users.");
-        }
-        return userRepository.save(user);
+    public List<UserEmailAndIdDto> findUserByEmail(final String email) {
+        return userRepository.findAllByEmailContaining(email)
+                .stream()
+                .map(userMapper::toUserEmailAndIdDto)
+                .toList();
     }
 
     @Override
-    public Optional<User> getUser(final Long userId) {
-        log.info("Retrieving user with ID: {}", userId);
-        return userRepository.findById(userId);
+    public List<UserDto> findAllUsers() {
+        return userRepository.findAll()
+                .stream()
+                .map(userMapper::toUserDto)
+                .toList();
     }
 
     @Override
-    public Optional<User> getUserByEmail(final String email) {
-        log.info("Retrieving user by email: {}", email);
-        return userRepository.findByEmail(email);
+    public List<UserBasicInfoDto> findAllUsersBasicInfo() {
+        return userRepository.findAll()
+                .stream()
+                .map(userMapper::toUserBasicInfoDto)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<User> findAllUsers() {
-        log.info("Retrieving all users");
-        return userRepository.findAll();
+    public UserDto findUserById(final Long userId) {
+        return userMapper.toUserDto(userRepository.findById(userId).orElseThrow());
+    }
+
+    public User findUserByIdForTraining(final Long userId) {
+        return userRepository.findById(userId).orElseThrow();
     }
 
     @Override
-    public void deleteUser(Long id) {
-        log.info("Attempting to delete user with ID: {}", id);
-        if (!userRepository.existsById(id)) {
-            log.error("Attempted to delete non-existent user with ID: {}", id);
-            throw new UserNotFoundException("No user found with ID: " + id);
-        }
-        userRepository.deleteById(id);
-        log.info("User deleted with ID: {}", id);
+    public List<UserDto> findAllUsersOlderThan(LocalDate time) {
+        return userRepository.findAll()
+                .stream()
+                .filter(user -> user.getBirthdate().isBefore(time))
+                .map(userMapper::toUserDto)
+                .toList();
     }
 
     @Override
-    public User updateUser(Long id, User updatedUser) {
-        log.info("Updating user with ID: {}", id);
-        return userRepository.findById(id)
-                .map(user -> {
-                    log.info("Current user details: {}", user);
-                    user.setFirstName(updatedUser.getFirstName());
-                    user.setLastName(updatedUser.getLastName());
-                    // Since email is a naturalId and should not be updated, we're excluding it from the update process
-                    user.setBirthdate(updatedUser.getBirthdate());
-                    User savedUser = userRepository.save(user);
-                    log.info("Updated user details: {}", savedUser);
-                    return savedUser;
-                })
-                .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + id));
+    public UserDto createUser(final NewUserDto user) {
+        log.info("Creating User {}", user);
+
+        return userMapper.toUserDto(userRepository.save(userMapper.newUserDtoToEntity(user)));
     }
 
     @Override
-    public User saveUser(User user) {
-        log.info("Saving or updating user: {}", user);
-        return userRepository.save(user);
+    public void deleteUserById(final Long userId) {
+        userRepository.deleteUserById(userId);
     }
 
     @Override
-    public Optional<UserDto> findUserById(Long id) {
-        return userRepository.findById(id)
-                .map(userMapper::toDto);
+    public UserDto updateUser(Long id, UpdateUserDto userDetails) {
+        User user = userRepository.findById(Objects.requireNonNull(id))
+                .orElseThrow(() -> new IllegalArgumentException("{User ID not found: " + userDetails.id()));
+        user.setFirstName(userDetails.firstName());
+        user.setLastName(userDetails.lastName());
+        user.setBirthdate(userDetails.birthdate());
+        user.setEmail(userDetails.email().toLowerCase());
+        user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+        user.setAuthorities(String.join(",", userDetails.roles())
+        );
+
+        return userMapper.toUserDto(userRepository.save(user));
     }
 
     @Override
-    public List<User> findAllUsersOlderThan(LocalDate time) {
-        return userRepository.findAllByBirthdateBefore(time);
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return userRepository.findByEmail(username);
     }
 }

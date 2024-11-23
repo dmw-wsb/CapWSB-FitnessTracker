@@ -25,7 +25,7 @@ spring:
 
 # Konfiguracja serwera, w tym niestandardowy port
 server:
-  port: 9090  # Ustawienie niestandardowego portu dla serwera
+  port: 8080  # Ustawienie niestandardowego portu dla serwera
 logging:
   level:
     org:

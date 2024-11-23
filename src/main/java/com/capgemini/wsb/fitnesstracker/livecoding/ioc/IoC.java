@@ -1,3 +1,4 @@
+
 package com.capgemini.wsb.fitnesstracker.livecoding.ioc;
 
 public class IoC {
@@ -18,7 +19,7 @@ public class IoC {
     }
 
     static class Foo {
-        private Bar bar;
+        private final Bar bar;
 
         // Dependency injected from Outside
         public Foo(Bar bar) {

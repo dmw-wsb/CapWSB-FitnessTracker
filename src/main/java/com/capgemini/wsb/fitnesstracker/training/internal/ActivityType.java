@@ -1,3 +1,4 @@
+
 package com.capgemini.wsb.fitnesstracker.training.internal;
 
 // TODO : JavaDoc

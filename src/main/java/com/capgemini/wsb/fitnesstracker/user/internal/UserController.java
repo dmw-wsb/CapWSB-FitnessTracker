@@ -1,84 +1,64 @@
+
 package com.capgemini.wsb.fitnesstracker.user.internal;
 
-import com.capgemini.wsb.fitnesstracker.user.api.User;
+import com.capgemini.wsb.fitnesstracker.user.api.dto.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 @RestController
 @RequestMapping("/v1/users")
 @RequiredArgsConstructor
-public class UserController {
+class UserController {
 
     private final UserServiceImpl userService;
-    private final UserMapper userMapper;
 
-    // Get all users with full details
     @GetMapping
-    public List<UserDto> getAllUsers() {
-        return userService.findAllUsers()
-                .stream()
-                .map(userMapper::toDto)
-                .toList();
-    }
-
-    // Get a single user by ID
-    @GetMapping("/{id}")
-    public ResponseEntity<UserDto> getUserById(@PathVariable Long id) {
-        return userService.findUserById(id)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-    // Get all users with basic information
-    @GetMapping("/simple")
-    public List<UserSimpleDto> getAllBasicInformationAboutUsers() {
-        return userService.findAllUsers()
-                .stream()
-                .map(userMapper::toUserSimpleDto)
-                .toList();
-    }
-
-    @GetMapping("/email")
-    public ResponseEntity<UserDto> getUserByEmail(@RequestParam String email) {
-        return userService.getUserByEmail(email)
-                .map(user -> ResponseEntity.ok(userMapper.toDto(user)))
-                .orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-    // Create a new user
-    @PostMapping
-    public ResponseEntity<UserDto> addUser(@RequestBody UserDto userDto) {
-        User newUser = userMapper.toEntity(userDto);
-        User savedUser = userService.createUser(newUser);
-        return ResponseEntity.status(HttpStatus.CREATED).body(userMapper.toDto(savedUser));
-    }
-
-    // Delete a user by ID
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        userService.deleteUser(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    // Update an existing user
-    @PutMapping("/{id}")
-    public ResponseEntity<UserDto> updateUser(@PathVariable Long id, @RequestBody UserDto userDto) {
-        User updatedUser = userService.updateUser(id, userMapper.toEntity(userDto));
-        return ResponseEntity.ok(userMapper.toDto(updatedUser));
+    public ResponseEntity<List<UserDto>> getAllUsers() {
+        return ResponseEntity.ok(userService.findAllUsers());
     }
 
     @GetMapping("/older/{time}")
-    public ResponseEntity<List<UserDto>> getUsersOlderThan(@PathVariable("time") LocalDate time) {
-        List<UserDto> users = userService.findAllUsersOlderThan(time)
-                .stream()
-                .map(userMapper::toDto)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(users);
+    public ResponseEntity<List<UserDto>> getAllUsersByAge(@PathVariable LocalDate time) {
+        return ResponseEntity.ok(userService.findAllUsersOlderThan(time));
+    }
+
+    @GetMapping("/simple")
+    public ResponseEntity<List<UserBasicInfoDto>> getAllBasicInfo() {
+        return ResponseEntity.ok(userService.findAllUsersBasicInfo());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<UserDto> getUserById(@PathVariable long id) {
+        return ResponseEntity.ok(userService.findUserById(id));
+    }
+
+    @GetMapping("/email")
+    public ResponseEntity<List<UserEmailAndIdDto>> getUsersByEmail(@RequestParam String email) {
+        return ResponseEntity.ok(userService.findUserByEmail(email));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+
+        userService.deleteUserById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping
+    public ResponseEntity<UserDto> createUser(@RequestBody NewUserDto user) {
+        UserDto createdUser = userService.createUser(user);
+        return ResponseEntity.created(URI.create("/v1/users/" + createdUser.id())).body(createdUser);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<UserDto> updateUser(@PathVariable Long id, @RequestBody UpdateUserDto user) {
+
+        return ResponseEntity.ok(userService.updateUser(id, user));
     }
 }

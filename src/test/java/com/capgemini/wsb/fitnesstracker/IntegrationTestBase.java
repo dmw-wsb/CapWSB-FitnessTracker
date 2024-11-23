@@ -1,6 +1,5 @@
 package com.capgemini.wsb.fitnesstracker;
 
-import com.capgemini.wsb.fitnesstracker.training.api.Training;
 import com.capgemini.wsb.fitnesstracker.user.api.User;
 import org.junit.Before;
 import org.junit.jupiter.api.AfterEach;

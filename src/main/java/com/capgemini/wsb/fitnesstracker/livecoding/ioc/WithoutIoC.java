@@ -1,3 +1,4 @@
+
 package com.capgemini.wsb.fitnesstracker.livecoding.ioc;
 
 public class WithoutIoC {
@@ -13,7 +14,7 @@ public class WithoutIoC {
     }
 
     static class Foo {
-        private Bar bar;
+        private final Bar bar;
 
         public Foo() {
             this.bar = new Bar(); // Direct dependency!

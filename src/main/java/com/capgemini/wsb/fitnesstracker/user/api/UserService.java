@@ -1,32 +1,25 @@
+
 package com.capgemini.wsb.fitnesstracker.user.api;
 
-import com.capgemini.wsb.fitnesstracker.user.internal.UserDto;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
+import com.capgemini.wsb.fitnesstracker.user.api.dto.NewUserDto;
+import com.capgemini.wsb.fitnesstracker.user.api.dto.UpdateUserDto;
+import com.capgemini.wsb.fitnesstracker.user.api.dto.UserDto;
 
 /**
  * Interface (API) for modifying operations on {@link User} entities through the API.
  * Implementing classes are responsible for executing changes within a database transaction, whether by continuing an existing transaction or creating a new one if required.
  */
-public interface UserService {
+public interface UserService extends UserProvider {
 
-    User createUser(User user);
+    UserDto createUser(NewUserDto user);
 
-    Optional<User> getUser(Long userId);
+    /**
+     * Delete user by his ID
+     *
+     * @param userId User ID
+     */
+    void deleteUserById(Long userId);
 
-    Optional<User> getUserByEmail(String email);
+    UserDto updateUser(Long id, UpdateUserDto user);
 
-    List<User> findAllUsers();
-
-    void deleteUser(Long id);
-
-    User updateUser(Long id, User updatedUser);
-
-    User saveUser(User user);
-
-    Optional<com.capgemini.wsb.fitnesstracker.user.internal.UserDto> findUserById(Long id);
-
-    List<User> findAllUsersOlderThan(LocalDate time);
 }
