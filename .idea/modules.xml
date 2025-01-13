@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/CapWSB-FitnessTracker/CapWSB-FitnessTracker.iml" filepath="$PROJECT_DIR$/CapWSB-FitnessTracker/CapWSB-FitnessTracker.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/Technologie_backendowe.iml" filepath="$PROJECT_DIR$/.idea/Technologie_backendowe.iml" />
+    </modules>
+  </component>
+</project>
