@@ -1,7 +1,5 @@
 package com.capgemini.wsb.fitnesstracker.training.api;
 
-import com.capgemini.wsb.fitnesstracker.training.api.Training;
-
 import java.util.Optional;
 
 public interface TrainingProvider {
