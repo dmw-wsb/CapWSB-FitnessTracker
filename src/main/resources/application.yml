@@ -1,0 +1,53 @@
+spring:
+  # Ustawienia główne aplikacji
+  config:
+    activate:
+      on-profile: loadInitialData  # Aktywacja profilu 'loadInitialData' przy starcie aplikacji
+
+  # Konfiguracja bazy danych H2 działającej w pamięci
+  datasource:
+    url: "jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=MySQL"
+    driver-class-name: "org.h2.Driver"
+    username: "sa"
+    password: ""
+
+  # Ustawienia JPA i Hibernate
+  jpa:
+    hibernate:
+      ddl-auto: update  # Automatyczne aktualizowanie schematu bazy danych
+    show-sql: true  # Wyświetlanie generowanego SQL w logach
+
+  # Konsola H2 dla łatwego dostępu i zarządzania bazą danych przez przeglądarkę
+  h2:
+    console:
+      enabled: true
+      path: "/h2-console"
+
+# Konfiguracja serwera, w tym niestandardowy port
+server:
+  port: 8080  # Ustawienie niestandardowego portu dla serwera
+logging:
+  level:
+    org:
+      springframework: DEBUG # Zwiększenie poziomu logowania dla frameworka Spring
+# Konfiguracja specyficzna dla profilu 'loadInitialData'
+---
+spring:
+  config:
+    activate:
+      on-profile: loadInitialData
+
+  # Ustawienia bazy danych, takie same jak dla głównego profilu
+  datasource:
+    url: "jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=MySQL"
+
+  # Ustawienia Hibernate dla profilu 'loadInitialData'
+  jpa:
+    hibernate:
+      ddl-auto: create-drop  # Tworzenie i usuwanie schematu bazy danych przy każdym uruchomieniu
+
+  # Inicjalizacja danych testowych przy starcie aplikacji
+  sql:
+    init:
+      mode: on-create
+      data-locations: "classpath:/data-test.sql"  # Lokalizacja skryptów SQL do inicjalizacji danych
